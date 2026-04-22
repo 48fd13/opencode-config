@@ -1,0 +1,556 @@
+{
+	"$schema": "https://opencode.ai/config.json",
+	"compaction": {
+		"auto": true,
+		"prune": true,
+		"reserved": 15000
+	},
+	"permission": {
+		"edit": "ask",
+		"bash": {
+			"rm -rf *": "deny",
+			"rm -r *": "deny",
+			"git push --force*": "deny",
+			"git reset --hard*": "deny",
+			"git clean -fd*": "deny",
+			"chmod -R *": "deny",
+			"DROP *": "deny",
+			"drop *": "deny",
+			"*": "ask"
+		}
+	},
+	"default_agent": "standard",
+	"agent": {
+		"default": {
+			"disable": true
+		},
+		"standard": {
+			"description": "Standard orchestrator — delegation-only; converses/plans and delegates execution to standard-* specialists.",
+			"mode": "primary",
+			"prompt": "{file:.opencode/agents/standard/standard.md}",
+			"permission": {
+				"edit": "deny",
+				"bash": "deny",
+				"question": "allow",
+				"task": {
+					"*": "deny",
+					"standard-*": "allow",
+					"explore": "allow",
+					"code-reviewer": "allow",
+					"codebase-architecture-mapper": "allow",
+					"type-change-inconsistency-finder": "allow",
+					"security-auditor": "allow",
+					"performance-analyzer": "allow"
+				}
+			},
+			"tools": {
+				"bash": false,
+				"write": false,
+				"edit": false,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": true
+			}
+		},
+		"plan": {
+			"disable": true
+		},
+		"build": {
+			"disable": true
+		},
+		"full-auto": {
+			"description": "Fully autonomous delegating orchestrator — routes execution to auto-* specialists and does not perform standalone writes/commands.",
+			"mode": "primary",
+			"prompt": "{file:.opencode/agents/auto/full-auto.md}",
+			"permission": {
+				"edit": "deny",
+				"question": "allow",
+				"bash": "deny",
+				"task": {
+					"*": "deny",
+					"auto-*": "allow",
+					"explore": "allow",
+					"code-reviewer": "allow",
+					"codebase-architecture-mapper": "allow",
+					"type-change-inconsistency-finder": "allow",
+					"security-auditor": "allow",
+					"performance-analyzer": "allow"
+				}
+			},
+			"tools": {
+				"bash": false,
+				"write": false,
+				"edit": false,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": true
+			}
+		},
+		"standard-plan": {
+			"description": "Standard planning subagent — produces a structured plan and asks clarifying questions when needed.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/standard/plan.md}",
+			"permission": {
+				"edit": "deny",
+				"bash": "deny",
+				"question": "allow",
+				"task": {
+					"*": "deny",
+					"explore": "allow",
+					"codebase-architecture-mapper": "allow"
+				}
+			},
+			"tools": {
+				"bash": false,
+				"write": false,
+				"edit": false,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"auto-plan": {
+			"description": "Autonomous planning subagent — produces a structured implementation plan without routine confirmation prompts.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/auto/plan.md}",
+			"permission": {
+				"edit": "deny",
+				"bash": "deny",
+				"question": "allow",
+				"task": {
+					"*": "deny",
+					"explore": "allow",
+					"codebase-architecture-mapper": "allow"
+				}
+			},
+			"tools": {
+				"bash": false,
+				"write": false,
+				"edit": false,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"standard-build": {
+			"description": "Standard implementation subagent — executes an approved plan with confirmation-gated command behavior.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/standard/build.md}",
+			"permission": {
+				"edit": "allow",
+				"bash": "ask",
+				"question": "allow",
+				"task": {
+					"*": "deny",
+					"standard-test-automation": "allow",
+					"code-reviewer": "allow",
+					"type-change-inconsistency-finder": "allow",
+					"security-auditor": "allow"
+				}
+			},
+			"tools": {
+				"bash": true,
+				"write": true,
+				"edit": true,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"auto-build": {
+			"description": "Autonomous implementation subagent — executes approved plans without routine confirmation prompts.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/auto/build.md}",
+			"permission": {
+				"edit": "allow",
+				"question": "allow",
+				"bash": {
+					"rm *": "ask",
+					"rm -rf *": "deny",
+					"rm -r *": "deny",
+					"git push --force*": "deny",
+					"git push*": "ask",
+					"git reset --hard*": "deny",
+					"git clean -fd*": "deny",
+					"git branch -d *": "ask",
+					"git branch -D *": "deny",
+					"chmod -R *": "deny",
+					"DROP *": "deny",
+					"drop *": "deny",
+					"docker push*": "ask",
+					"npm publish*": "deny",
+					"*": "ask"
+				},
+				"task": {
+					"*": "deny",
+					"auto-test-automation": "allow",
+					"code-reviewer": "allow",
+					"type-change-inconsistency-finder": "allow",
+					"security-auditor": "allow"
+				}
+			},
+			"tools": {
+				"bash": true,
+				"write": true,
+				"edit": true,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"explore": {
+			"description": "Use for fast codebase search and exploration — finding files by pattern, locating code by keyword, answering structural questions. Use before planning or implementing to orient quickly without consuming heavy context.",
+			"mode": "subagent",
+			"hidden": true,
+			"permission": {
+				"edit": "deny",
+				"bash": "deny"
+			},
+			"tools": {
+				"bash": false,
+				"write": false,
+				"edit": false,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"standard-test-automation": {
+			"description": "Standard test automation subagent — creates and updates tests with confirmation-gated command behavior.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/standard/test-automation.md}",
+			"permission": {
+				"edit": "allow",
+				"question": "allow",
+				"bash": {
+					"npm test*": "allow",
+					"npm run test*": "allow",
+					"npx jest*": "allow",
+					"npx vitest*": "allow",
+					"pytest*": "allow",
+					"go test*": "allow",
+					"yarn test*": "allow",
+					"npm run lint*": "allow",
+					"npx tsc*": "allow",
+					"rm -rf *": "deny",
+					"git push*": "deny",
+					"git reset --hard*": "deny",
+					"git clean -fd*": "deny",
+					"chmod -R *": "deny",
+					"DROP *": "deny",
+					"drop *": "deny",
+					"*": "ask"
+				}
+			},
+			"tools": {
+				"bash": true,
+				"write": true,
+				"edit": true,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"auto-test-automation": {
+			"description": "Autonomous test automation subagent — creates and updates tests without routine confirmation prompts.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/auto/test-automation.md}",
+			"permission": {
+				"edit": "allow",
+				"question": "allow",
+				"bash": {
+					"rm -rf *": "deny",
+					"git push --force*": "deny",
+					"git push*": "ask",
+					"git reset --hard*": "deny",
+					"git clean -fd*": "deny",
+					"chmod -R *": "deny",
+					"DROP *": "deny",
+					"drop *": "deny",
+					"docker push*": "ask",
+					"npm publish*": "deny",
+					"*": "ask"
+				}
+			},
+			"tools": {
+				"bash": true,
+				"write": true,
+				"edit": true,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"test-automation": {
+			"disable": true
+		},
+		"codebase-architecture-mapper": {
+			"description": "Use when you need a fast, accurate map of how code is organized and how parts relate across one or more directories — especially before planning features, refactors, onboarding, or reviews.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/codebase-architecture-mapper.md}",
+			"permission": {
+				"edit": "deny",
+				"bash": "deny"
+			},
+			"tools": {
+				"bash": false,
+				"write": false,
+				"edit": false,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"type-change-inconsistency-finder": {
+			"description": "Use after changing a type, interface, schema, DTO, or shared contract to proactively find leftover inconsistencies in recently modified code before merging.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/type-change-inconsistency-finder.md}",
+			"permission": {
+				"edit": "deny",
+				"bash": "deny"
+			},
+			"tools": {
+				"bash": false,
+				"write": false,
+				"edit": false,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"code-reviewer": {
+			"description": "Use after completing a non-trivial implementation block to review for correctness, conventions, security surface, and test coverage gaps. Returns structured findings — Critical, Suggestion, Nit.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/code-reviewer.md}",
+			"permission": {
+				"edit": "deny",
+				"bash": "deny"
+			},
+			"tools": {
+				"bash": false,
+				"write": false,
+				"edit": false,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"standard-refactor": {
+			"description": "Standard refactor subagent — restructures code without behavior change using confirmation-gated command behavior.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/standard/refactor.md}",
+			"permission": {
+				"edit": "allow",
+				"bash": "ask",
+				"question": "allow"
+			},
+			"tools": {
+				"bash": true,
+				"write": true,
+				"edit": true,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"auto-refactor": {
+			"description": "Autonomous refactor subagent — restructures code without behavior change and without routine confirmation prompts.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/auto/refactor.md}",
+			"permission": {
+				"edit": "allow",
+				"question": "allow",
+				"bash": {
+					"rm -rf *": "deny",
+					"git push --force*": "deny",
+					"git push*": "ask",
+					"git reset --hard*": "deny",
+					"git clean -fd*": "deny",
+					"chmod -R *": "deny",
+					"DROP *": "deny",
+					"drop *": "deny",
+					"*": "ask"
+				}
+			},
+			"tools": {
+				"bash": true,
+				"write": true,
+				"edit": true,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"refactor": {
+			"disable": true
+		},
+		"standard-docs-writer": {
+			"description": "Standard docs writer subagent — updates docs only with confirmation-gated execution.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/standard/docs-writer.md}",
+			"permission": {
+				"edit": "allow",
+				"bash": "deny",
+				"question": "allow"
+			},
+			"tools": {
+				"bash": false,
+				"write": true,
+				"edit": true,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"auto-docs-writer": {
+			"description": "Autonomous docs writer subagent — updates docs only without routine confirmation prompts.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/auto/docs-writer.md}",
+			"permission": {
+				"edit": "allow",
+				"bash": "deny",
+				"question": "allow"
+			},
+			"tools": {
+				"bash": false,
+				"write": true,
+				"edit": true,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"docs-writer": {
+			"disable": true
+		},
+		"security-auditor": {
+			"description": "Use when a task touches auth, secrets, API contracts, or input validation. Reviews for vulnerabilities and returns prioritized findings — High, Medium, Low. No code changes.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/security-auditor.md}",
+			"permission": {
+				"edit": "deny",
+				"bash": "deny"
+			},
+			"tools": {
+				"bash": false,
+				"write": false,
+				"edit": false,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"performance-analyzer": {
+			"description": "Use when a task involves performance, bundle size, query efficiency, or rendering optimization. Identifies bottlenecks with evidence and returns prioritized findings. No code changes.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/performance-analyzer.md}",
+			"permission": {
+				"edit": "deny",
+				"bash": "deny"
+			},
+			"tools": {
+				"bash": false,
+				"write": false,
+				"edit": false,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"standard-devops": {
+			"description": "Standard DevOps subagent — handles Helm, Docker, and CI/CD with confirmation-gated execution.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/standard/devops.md}",
+			"permission": {
+				"edit": "allow",
+				"bash": "ask",
+				"question": "allow"
+			},
+			"tools": {
+				"bash": true,
+				"write": true,
+				"edit": true,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"auto-devops": {
+			"description": "Autonomous DevOps subagent — handles Helm, Docker, and CI/CD without routine confirmation prompts while preserving risk gates.",
+			"mode": "subagent",
+			"hidden": true,
+			"prompt": "{file:.opencode/agents/auto/devops.md}",
+			"permission": {
+				"edit": "allow",
+				"question": "allow",
+				"bash": {
+					"rm -rf *": "deny",
+					"git push --force*": "deny",
+					"git push*": "ask",
+					"git reset --hard*": "deny",
+					"git clean -fd*": "deny",
+					"chmod -R *": "deny",
+					"DROP *": "deny",
+					"drop *": "deny",
+					"docker push*": "ask",
+					"npm publish*": "deny",
+					"kubectl apply*": "ask",
+					"kubectl delete*": "ask",
+					"helm upgrade*": "ask",
+					"helm install*": "ask",
+					"helm uninstall*": "ask",
+					"terraform apply*": "ask",
+					"terraform destroy*": "deny",
+					"*": "ask"
+				}
+			},
+			"tools": {
+				"bash": true,
+				"write": true,
+				"edit": true,
+				"read": true,
+				"grep": true,
+				"glob": true,
+				"webfetch": false
+			}
+		},
+		"devops": {
+			"disable": true
+		}
+	}
+}
