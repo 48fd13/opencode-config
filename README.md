@@ -2,18 +2,21 @@
 
 A reusable **OpenCode orchestration baseline** you can copy into any repository.
 
-It provides a two-lane workflow (`standard` and `full-auto`) with delegation-first execution, plus project-level guidance and reusable skills.
+It provides a two-lane workflow (`standard` and `full-auto`) with delegation-first execution, plus a bootstrap path that generates repo-specific docs.
 
 ## What this repo includes
 
 - `opencode.json` — agent registry, permissions, and defaults
-- `AGENTS.md` — project execution policy, risk gates, and collaboration rules
+- `AGENTS.md` — portable execution policy (workflow, risk gates, done criteria)
+- `ARCHITECTURE.md` — repository map and boundaries (repo-specific)
+- `RUNBOOK.md` — executable command reference (repo-specific)
+- `BOOTSTRAP.md` — one-shot prompt for initializing a copied setup
 - `.opencode/agents/` — primary orchestrators and specialist subagents
   - primary: `standard`, `full-auto`
   - standard specialists: `standard-plan`, `standard-build`, `standard-test-automation`, `standard-refactor`, `standard-devops`, `standard-docs-writer`
   - auto specialists: `auto-plan`, `auto-build`, `auto-test-automation`, `auto-refactor`, `auto-devops`, `auto-docs-writer`
   - shared specialists: `explore`, `code-reviewer`, `security-auditor`, `performance-analyzer`, `codebase-architecture-mapper`, `type-change-inconsistency-finder`
-- `.opencode/skills/` — bundled, loadable skills (`flist-build-upload`, `hub-monorepo`, `syngpipe-runtime`, `vm-deployment`)
+- `.opencode/skills/` — bundled, loadable skills (`repo-bootstrap`)
 
 ## Lane model (core workflow)
 
@@ -54,6 +57,12 @@ Additional specialists (tests, docs, devops, refactor, security, performance) ar
   - destructive/irreversible operations
   - external API contract breaks
 
+## Skill discovery (zero config)
+
+- OpenCode discovers skills by convention from `.opencode/skills/<skill-name>/SKILL.md`.
+- No `opencode.json` setting is needed for a skills directory path.
+- Run `python3 verify-opencode-setup.py` after copying to validate required paths.
+
 ## How to use this in another repo
 
 1. Copy these files/folders into the target repo root:
@@ -61,21 +70,19 @@ Additional specialists (tests, docs, devops, refactor, security, performance) ar
    - `AGENTS.md`
    - `.opencode/agents/`
    - `.opencode/skills/`
-2. Update `AGENTS.md`:
-   - repository layout and terminology
-   - risk gates and done criteria
-   - documentation/runbook references
-3. Update skills:
-   - keep only skills relevant to your project
-   - rename/add skill folders under `.opencode/skills/` as needed
-   - make sure `AGENTS.md` skill-routing table matches actual skill names
+2. Run the prompt in `BOOTSTRAP.md` to generate/update repo-specific docs:
+   - `ARCHITECTURE.md`
+   - `RUNBOOK.md`
+   - `.opencode/skills/` (add/remove skills relevant to the repo)
+3. Keep `AGENTS.md` mostly portable and policy-focused.
 4. Adjust `opencode.json`:
    - set your preferred `default_agent` (`standard` or `full-auto`)
    - tune permission rules for your environment
    - keep delegation boundaries intact unless you intentionally want direct execution in primaries
 5. Reload/restart OpenCode so agent/skill config is re-read.
+6. Run `python3 verify-opencode-setup.py` to confirm setup integrity.
 
 ## Notes
 
 - Current default agent in this repo is `standard`.
-- The included `AGENTS.md` and skill set are prefilled for a Phase4AI hub-style workspace and should be customized when reused.
+- The included `repo-bootstrap` skill is intended to reduce manual customization after copy.
